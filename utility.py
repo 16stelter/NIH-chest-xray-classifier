@@ -15,6 +15,7 @@ class Utility:
         print("\033[92m I found %d training and %d test .tfrecord files. \033[00m" % (
         len(self._training_names), len(self._test_names)))
         self._df = pd.read_csv(path + "/preprocessed_data.csv")
+        self._df.rename(columns={'Unnamed: 0': 'image'}, inplace=True)
 
     def read_tfrecord(self, sample):
         """
@@ -33,8 +34,8 @@ class Utility:
         image = self.decode_image(sample["image"])
 
         label = []
-        for i in range(len(self._df.columns[1:])):
-            label.append(sample[self._df.columns[i + 1]])
+        for i in self._df.columns[1:]:
+            label.append(sample[i])
 
         return image, label
 
@@ -51,9 +52,9 @@ class Utility:
 
     def create_dataset(self, path):
         """
-        Turns a tfrecord file into a tf dataset using the methods above.
+        Turns tfrecord files into a tf dataset using the methods above.
 
-        :param path: Path to the tfrecord file
+        :param path: Paths to the tfrecord files
         :return: The dataset
         """
         ignore_order = tf.data.Options()
@@ -63,15 +64,23 @@ class Utility:
         ds = ds.with_options(
             ignore_order
         )
-
+        ds = ds.shuffle(1024)
+        ds = ds.batch(8)
+        return ds
         # ex = next(iter(ds))
         # print(ex[1:])
         # plt.imshow(ex[0] / 255.0)
         # plt.show()
+
+    def get_training_names(self):
+        return self._training_names
+
+    def get_test_names(self):
+        return self._test_names
 
         return ds
 
 
 if __name__ == "__main__":
     ut = Utility(".")
-    ut.create_dataset(ut._training_names[0])
+    ut.create_dataset(ut._training_names)
