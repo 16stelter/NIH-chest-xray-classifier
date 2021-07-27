@@ -1,6 +1,8 @@
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report
 
 
 class Utility:
@@ -15,7 +17,7 @@ class Utility:
         split_ind_r = int(0.9 * len(self._filenames))
         self._training_names, self._valid_names, self._test_names = self._filenames[:split_ind_l], \
                                                                     self._filenames[split_ind_l:split_ind_r], \
-                                                                    self._filenames[split_ind_r:]
+                                                                    self._filenames[-1]
         print("\033[92m I found %d training, %d validation and %d test .tfrecord files. \033[00m" % (
         len(self._training_names), len(self._valid_names), len(self._test_names)))
         self._df = pd.read_csv(path + "/preprocessed_data.csv")
@@ -84,6 +86,12 @@ class Utility:
 
     def get_valid_names(self):
         return self._valid_names
+
+    def classification_report(self, y_test, y_pred):
+        y_pred_classes = np.argmax(y_pred, axis=1)
+        print(y_pred_classes)
+
+        print(classification_report(y_test, y_pred_classes))
 
 
 if __name__ == "__main__":

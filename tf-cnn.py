@@ -1,8 +1,9 @@
+import numpy as np
 from tensorflow.python.keras.callbacks import ModelCheckpoint
 
 import utility
 import tensorflow as tf
-from tensorflow.keras import datasets, layers, models
+from tensorflow.keras import layers, models
 
 
 class TfCNN:
@@ -14,6 +15,10 @@ class TfCNN:
 
     def initialize_model(self):
         self._model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(768, 768, 3)))
+        self._model.add(layers.MaxPooling2D((2, 2)))
+        self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+        self._model.add(layers.MaxPooling2D((2, 2)))
+        self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
         self._model.add(layers.MaxPooling2D((2, 2)))
         self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
         self._model.add(layers.MaxPooling2D((2, 2)))
@@ -42,10 +47,14 @@ class TfCNN:
                                         validation_data=validation_ds,
                                         callbacks=[checkpoint])
 
-    def predict(self, dataset):
-        y_pred = self._model.predict(dataset)
-
+    def predict(self):
+        ds = self._ut.create_dataset(self._ut.get_test_names())
+        y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
+        y_pred = self._model.predict(ds)
+        return y_test, y_pred
 
 if __name__ == "__main__":
     cnn = TfCNN()
     cnn.train()
+    y_test, y_pred = cnn.predict()
+    cnn._ut.classification_report(y_test, y_pred)
