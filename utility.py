@@ -10,10 +10,14 @@ class Utility:
     """
     def __init__(self, path):
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
-        split_ind = int(0.9 * len(self._filenames))
-        self._training_names, self._test_names = self._filenames[:split_ind], self._filenames[split_ind:]
-        print("\033[92m I found %d training and %d test .tfrecord files. \033[00m" % (
-        len(self._training_names), len(self._test_names)))
+        print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
+        split_ind_l = int(0.7 * len(self._filenames))
+        split_ind_r = int(0.9 * len(self._filenames))
+        self._training_names, self._valid_names, self._test_names = self._filenames[:split_ind_l], \
+                                                                    self._filenames[split_ind_l:split_ind_r], \
+                                                                    self._filenames[split_ind_r:]
+        print("\033[92m I found %d training, %d validation and %d test .tfrecord files. \033[00m" % (
+        len(self._training_names), len(self._valid_names), len(self._test_names)))
         self._df = pd.read_csv(path + "/preprocessed_data.csv")
         self._df.rename(columns={'Unnamed: 0': 'image'}, inplace=True)
 
@@ -78,7 +82,8 @@ class Utility:
     def get_test_names(self):
         return self._test_names
 
-        return ds
+    def get_valid_names(self):
+        return self._valid_names
 
 
 if __name__ == "__main__":

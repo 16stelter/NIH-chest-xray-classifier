@@ -1,6 +1,9 @@
+from tensorflow.python.keras.callbacks import ModelCheckpoint
+
 import utility
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
+
 
 class TfCNN:
     def __init__(self):
@@ -24,22 +27,24 @@ class TfCNN:
         self._model.summary()
 
         self._model.compile(optimizer='adam',
-                      loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
-                      metrics=['accuracy'])
+                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+                            metrics=['accuracy'])
 
-        #self._history = self._model.fit(train_images, train_labels, epochs=10,
+        # self._history = self._model.fit(train_images, train_labels, epochs=10,
         #                    validation_data=(test_images, test_labels))
-
 
     def train(self):
         ds = self._ut.create_dataset(self._ut.get_training_names())
-        validation_ds = self._ut.create_dataset(self._ut.get_test_names())
-
+        validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
+        filepath = "./weights"
+        checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
         self._history = self._model.fit(ds, epochs=10,
-                            validation_data=validation_ds)
+                                        validation_data=validation_ds,
+                                        callbacks=[checkpoint])
 
-    def predict(self):
-        pass
+    def predict(self, dataset):
+        y_pred = self._model.predict(dataset)
+
 
 if __name__ == "__main__":
     cnn = TfCNN()
