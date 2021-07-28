@@ -15,26 +15,23 @@ class TfCNN:
         self._history = 0
 
     def initialize_model(self):
-        self._model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(768, 768, 3)))
+        self._model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(100, 100, 3)))
+        self._model.add(layers.Conv2D(32, (3, 3), activation='relu'))
         self._model.add(layers.MaxPooling2D((2, 2)))
+        self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
         self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
         self._model.add(layers.MaxPooling2D((2, 2)))
         self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-        self._model.add(layers.MaxPooling2D((2, 2)))
-        self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-        self._model.add(layers.MaxPooling2D((2, 2)))
-        self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-        self._model.add(layers.MaxPooling2D((2, 2)))
         self._model.add(layers.Conv2D(64, (3, 3), activation='relu'))
         self._model.add(layers.Flatten())
         self._model.add(layers.Dense(64, activation='relu'))
-        self._model.add(layers.Dense(15))
+        self._model.add(layers.Dense(15, activation='sigmoid'))
 
         self._model.summary()
 
         self._model.compile(optimizer='adam',
-                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
-                            metrics=['accuracy'])
+                            loss='binary_crossentropy',
+                            metrics=[tf.keras.metrics.AUC(name="auc")])
 
         # self._history = self._model.fit(train_images, train_labels, epochs=10,
         #                    validation_data=(test_images, test_labels))
@@ -46,7 +43,9 @@ class TfCNN:
         checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max',
                                      save_freq=1000)
         self._history = self._model.fit(ds, epochs=10,
+                                        steps_per_epoch=self._ut.get_steps_per_epoch(),
                                         validation_data=validation_ds,
+                                        validation_steps=self._ut.get_validation_steps(),
                                         callbacks=[checkpoint, keras.callbacks.EarlyStopping(monitor="loss", 
                                                                                              patience=3)])
 

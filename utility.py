@@ -11,6 +11,7 @@ class Utility:
     machine learning tasks.
     """
     def __init__(self, path):
+        self._batch_size = 64
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
         print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
         split_ind_l = int(0.7 * len(self._filenames))
@@ -22,6 +23,11 @@ class Utility:
         len(self._training_names), len(self._valid_names), len(self._test_names)))
         self._df = pd.read_csv(path + "/preprocessed_data.csv")
         self._df.rename(columns={'Unnamed: 0': 'image'}, inplace=True)
+
+        self._train_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(self._training_names)) / self._batch_size))
+        self._valid_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(self._valid_names)) /self._batch_size))
+        print("\033[92m Steps per epoch: " + str(self._train_len) + "\033[00m")
+        print("\033[92m Validation steps: " + str(self._valid_len) + "\033[00m")
 
     def read_tfrecord(self, sample):
         """
@@ -53,6 +59,7 @@ class Utility:
         :return: Decoded image
         """
         image = tf.image.decode_jpeg(image, channels=3)
+        image = tf.image.resize(image, (100, 100))
         image = tf.cast(image, tf.float32)
         return image / 255.0  # normalizing
 
@@ -71,7 +78,7 @@ class Utility:
             ignore_order
         )
         ds = ds.shuffle(1024)
-        ds = ds.batch(16)
+        ds = ds.batch(self._batch_size)
         return ds
         # ex = next(iter(ds))
         # print(ex[1:])
@@ -86,6 +93,12 @@ class Utility:
 
     def get_valid_names(self):
         return self._valid_names
+
+    def get_steps_per_epoch(self):
+        return self._train_len
+
+    def get_validation_steps(self):
+        return self._valid_len
 
     def classification_report(self, y_test, y_pred):
         y_pred_classes = np.argmax(y_pred, axis=1)
