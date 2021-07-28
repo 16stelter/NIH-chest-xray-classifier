@@ -1,3 +1,4 @@
+import keras.callbacks
 import numpy as np
 from tensorflow.python.keras.callbacks import ModelCheckpoint
 
@@ -42,10 +43,12 @@ class TfCNN:
         ds = self._ut.create_dataset(self._ut.get_training_names())
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
-        checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+        checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max',
+                                     save_freq=1000)
         self._history = self._model.fit(ds, epochs=10,
                                         validation_data=validation_ds,
-                                        callbacks=[checkpoint])
+                                        callbacks=[checkpoint, keras.callbacks.EarlyStopping(monitor="loss", 
+                                                                                             patience=3)])
 
     def predict(self):
         ds = self._ut.create_dataset(self._ut.get_test_names())

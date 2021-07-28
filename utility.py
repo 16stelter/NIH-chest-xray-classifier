@@ -54,7 +54,7 @@ class Utility:
         """
         image = tf.image.decode_jpeg(image, channels=3)
         image = tf.cast(image, tf.float32)
-        return image
+        return image / 255.0  # normalizing
 
     def create_dataset(self, path):
         """
@@ -71,7 +71,7 @@ class Utility:
             ignore_order
         )
         ds = ds.shuffle(1024)
-        ds = ds.batch(8)
+        ds = ds.batch(16)
         return ds
         # ex = next(iter(ds))
         # print(ex[1:])
