@@ -49,6 +49,9 @@ class TfCNN:
                                         callbacks=[checkpoint, keras.callbacks.EarlyStopping(monitor="loss", 
                                                                                              patience=3)])
 
+        with open('/history', 'wb') as f:
+            pickle.dump(self._history.history, f)
+
     def predict(self):
         ds = self._ut.create_dataset(self._ut.get_test_names())
         y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
