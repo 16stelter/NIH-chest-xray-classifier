@@ -1,0 +1,134 @@
+ There are 256 total .tfrecord files.                                                                                                                                                                       
+ I found 179 training, 51 validation and 20 test .tfrecord files.                                                                                                                                           
+2021-07-28 23:09:43.991964: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)                                                 
+2021-07-28 23:09:44.011170: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2200000000 Hz                                                                                         
+ Steps per epoch: 1225                                                                                                                                                                                      
+ Validation steps: 350                                                                                                                                                                                      
+Model: "sequential"                                                                                                                                                                                         
+_________________________________________________________________                                                                                                                                           
+Layer (type)                 Output Shape              Param #                                                                                                                                              
+=================================================================                                                                                                                                           
+conv2d (Conv2D)              (None, 98, 98, 32)        896                                                                                                                                                  
+_________________________________________________________________                                                                                                                                           
+conv2d_1 (Conv2D)            (None, 96, 96, 32)        9248                                                                                                                                                 
+_________________________________________________________________                                                                                                                                           
+max_pooling2d (MaxPooling2D) (None, 48, 48, 32)        0                                                                                                                                                    
+_________________________________________________________________                                                                                                                                           
+conv2d_2 (Conv2D)            (None, 46, 46, 64)        18496                                                                                                                                                
+_________________________________________________________________                                                                                                                                           
+conv2d_3 (Conv2D)            (None, 44, 44, 64)        36928                                                                                                                                                
+_________________________________________________________________                                                                                                                                           
+max_pooling2d_1 (MaxPooling2 (None, 22, 22, 64)        0                                                                                                                                                    
+_________________________________________________________________                                                                                                                                           
+conv2d_4 (Conv2D)            (None, 20, 20, 64)        36928                                                                                                                                                
+_________________________________________________________________                                                                                                                                           
+conv2d_5 (Conv2D)            (None, 18, 18, 64)        36928                                                                                                                                                
+_________________________________________________________________                                                                                                                                           
+flatten (Flatten)            (None, 20736)             0                                                                                                                                                    
+_________________________________________________________________                                                                                                                                           
+dense (Dense)                (None, 64)                1327168                                                                                                                                              
+_________________________________________________________________                                                                                                                                           
+dense_1 (Dense)              (None, 15)                975                                                                                                                                                  
+=================================================================  
+
+Total params: 1,467,567                                                                                                                                                                            [53/1817]
+Trainable params: 1,467,567                                                                                                                                                                                 
+Non-trainable params: 0                                                                                                                                                                                     
+_________________________________________________________________                                                                                                                                           
+Epoch 1/10                                                                                                                                                                                                  
+ 636/1225 [==============>...............] - ETA: 8:02 - loss: 0.2412 - auc: 0.8020                                                                                                                         
+ 927/1225 [=====================>........] - ETA: 4:03 - loss: 0.2342 - auc: 0.8114                                                                                                                         
+ 929/1225 [=====================>........] - ETA: 4:02 - loss: 0.2342 - auc: 0.8114                                                                                                                         
+1000/1225 [=======================>......] - ETA: 3:03 - loss: 0.2329 - auc: 0.8132                                                                                                                         
+Epoch 00001: loss improved from inf to 0.21642, saving model to ./weights                                                                                                                                   
+2021-07-28 23:23:35.279388: W tensorflow/python/util/util.cc:348] Sets are not currently considered sequences, but this may change in the future, so consider avoiding using them.                          
+1225/1225 [==============================] - 1106s 899ms/step - loss: 0.2297 - auc: 0.8178 - val_loss: 0.2113 - val_auc: 0.8510                                                                             
+Epoch 2/10                                                                                                                                                                                                  
+ 775/1225 [=================>............] - ETA: 6:01 - loss: 0.2078 - auc: 0.8543                                                                                                                         
+Epoch 00002: loss improved from 0.21642 to 0.20675, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1091s 887ms/step - loss: 0.2071 - auc: 0.8553 - val_loss: 0.2039 - val_auc: 0.8624                                                                             
+Epoch 3/10                                                                                                                                                                                                  
+ 550/1225 [============>.................] - ETA: 9:05 - loss: 0.2044 - auc: 0.8618                                                                                                                         
+Epoch 00003: loss improved from 0.20675 to 0.20357, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1094s 890ms/step - loss: 0.2035 - auc: 0.8632 - val_loss: 0.2016 - val_auc: 0.8675                                                                             
+Epoch 4/10                                                                                                                                                                                                  
+ 325/1225 [======>.......................] - ETA: 12:10 - loss: 0.2022 - auc: 0.8678                                                                                                                        
+Epoch 00004: loss improved from 0.20357 to 0.20053, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1102s 897ms/step - loss: 0.2002 - auc: 0.8704 - val_loss: 0.2001 - val_auc: 0.8730                                                                             
+Epoch 5/10                                                                                                                                                                                                  
+ 100/1225 [=>............................] - ETA: 15:00 - loss: 0.1998 - auc: 0.8747                                                                                                                        
+Epoch 00005: loss improved from 0.20053 to 0.19832, saving model to ./weights                                                                                                                               
+1100/1225 [=========================>....] - ETA: 1:40 - loss: 0.1966 - auc: 0.8777                                                                                                                         
+Epoch 00005: loss improved from 0.19832 to 0.19474, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1087s 885ms/step - loss: 0.1964 - auc: 0.8779 - val_loss: 0.1986 - val_auc: 0.8763                                                                             
+Epoch 6/10                                                                                                                                                                                                  
+ 875/1225 [====================>.........] - ETA: 4:39 - loss: 0.1934 - auc: 0.8836                                                                                                                         
+Epoch 00006: loss improved from 0.19474 to 0.19227, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1081s 880ms/step - loss: 0.1929 - auc: 0.8842 - val_loss: 0.1982 - val_auc: 0.8760                                                                             
+Epoch 7/10                                                                                                                                                                                                  
+ 650/1225 [==============>...............] - ETA: 7:40 - loss: 0.1898 - auc: 0.8898                                                                                                                         
+Epoch 00007: loss improved from 0.19227 to 0.18966, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1086s 884ms/step - loss: 0.1892 - auc: 0.8906 - val_loss: 0.1981 - val_auc: 0.8756                                                                             
+Epoch 8/10                                                                                                                                                                                                  
+ 425/1225 [=========>....................] - ETA: 10:42 - loss: 0.1872 - auc: 0.8953                                                                                                                        
+Epoch 00008: loss improved from 0.18966 to 0.18457, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1081s 880ms/step - loss: 0.1854 - auc: 0.8971 - val_loss: 0.2034 - val_auc: 0.8700                                                                             
+Epoch 9/10                                                                                                                                                                                                  
+ 200/1225 [===>..........................] - ETA: 13:41 - loss: 0.1830 - auc: 0.9025                                                                                                                        
+Epoch 00009: loss improved from 0.18457 to 0.18082, saving model to ./weights                                                                                                                               
+1200/1225 [============================>.] - ETA: 20s - loss: 0.1798 - auc: 0.9055                                                                                                                          
+Epoch 00009: loss improved from 0.18082 to 0.17700, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1084s 883ms/step - loss: 0.1798 - auc: 0.9056 - val_loss: 0.2103 - val_auc: 0.8632                                                                             
+Epoch 10/10                                                                                                                                                                                                 
+ 135/1225 [==>...........................] - ETA: 14:28 - loss: 0.1761 - auc: 0.9110                                                                                                                        
+ 975/1225 [======================>.......] - ETA: 3:19 - loss: 0.1742 - auc: 0.9132                                                                                                                         
+Epoch 00010: loss improved from 0.17700 to 0.17228, saving model to ./weights                                                                                                                               
+1225/1225 [==============================] - 1088s 885ms/step - loss: 0.1736 - auc: 0.9139 - val_loss: 0.2258 - val_auc: 0.8476
+
+[ 0  8  0  4  0  0  0  0  0  1  8  3  0  0  0  3  0  3  8  0  0  0  1  0                                                                                                                                    
+  0  6  0  0  0  0  0 13  0  3  1  0  0  0  1  0  0  0  0  0  8  0  0  3
+  0  0  3  8  0  0  0  0  0  0  1  4  8  0  0  0  0  0  0  0  0  0  8  0
+  0  0  0  0  8  0  0  0  0  0  0  1  0  0  0  3  0  0  8  0  0  0  0  0
+  4  3  0  0  3  0  0  0  0  8  0  3  3  4  0  0  0  0  0  0  8  0  0  0
+  0  0  0  3  0  0  0  3  8  0  0  4  0  0  0  0  3 13  3  0  0  0  1 13
+  0  0  3  0  0  4  0  0  0  0  0  0  0  0  0  0  3  0  0  0  3  1  8  0
+  8  8  0  3 13  0  0  4  0  0  3  0  0  0  0  0  0  0  0  0  0  0 13  0
+ 13  0  0  0  3 12  0  0  0  8  0  3  4  0  0  0  0  0  3  0  0  0  0  0
+  0  0  3 12  3  0  0  0  0  0  0  0  0  4  0  0  3  0  0  6  0  0  0  0
+  0  0  0  0  0  0  0  4  0  0  0  0  0  0  0  8  0  0  0  8  0  0  0  0
+  0  0  0  0  3  0  0  3  4  0  0  0  0  1  0  0  0  3  1  0  0  3 12  0
+  8  0  0  0  0  0  0  3 13  0  0  0  0  1  0  0  0  0  5  0  0  0  0  0
+  0  0  0  3  0  0  0  0  0 13  0  3  4  8  3  3  3  0  0  3  4  0  3  0
+  4  0  0  1  0  0 12  0  0  0  0  0 12  0  0  0  8  0  0  0  0  0  0  0
+  0  8  0 13  3  1  1  0  8  0 11  3  0  0  0  0  8  0  0  0  0  0  0  0
+  0  0  4  0  0  0  0  0  0  8  0  8  3  0  0  0  0  6  3  0  8  0  0  0
+  3  0  0  0  0  3  0  8  0  0  0  0  4  0  6  3  0  3  0  0  3  3  0  4
+  0  0  5 12  0  0]                                                                                   
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use 
+`zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))                                                
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use 
+`zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))                                                
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use 
+`zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))                                                
+              precision    recall  f1-score   support                                                 
+
+           0       0.54      0.71      0.61       236                                                 
+           1       0.00      0.00      0.00        39                                                 
+           2       0.00      0.00      0.00        17                                                 
+           3       0.17      0.12      0.14        66                                                 
+           4       0.00      0.00      0.00        10                                                 
+           5       0.50      0.25      0.33         4                                                 
+           6       0.00      0.00      0.00         3                                                 
+           7       0.00      0.00      0.00         7                                                 
+           8       0.04      0.04      0.04        24                                                 
+          10       0.00      0.00      0.00         4                                                 
+          11       0.00      0.00      0.00         5                                                 
+          12       0.00      0.00      0.00        16                                                 
+          13       0.11      0.14      0.12         7                                                 
+
+    accuracy                           0.41       438                                                 
+   macro avg       0.10      0.10      0.10       438                                                 
+weighted avg       0.32      0.41      0.36       438 

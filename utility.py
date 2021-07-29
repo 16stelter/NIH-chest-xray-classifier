@@ -99,6 +99,9 @@ class Utility:
 
     def get_validation_steps(self):
         return self._valid_len
+    
+    def get_batch_size(self):
+        return self._batch_size
 
     def classification_report(self, y_test, y_pred):
         y_pred_classes = np.argmax(y_pred, axis=1)

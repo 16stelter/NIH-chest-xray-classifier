@@ -4,6 +4,7 @@ from tensorflow.python.keras.callbacks import ModelCheckpoint
 
 import utility
 import tensorflow as tf
+import pickle
 from tensorflow.keras import layers, models
 
 
@@ -37,19 +38,19 @@ class TfCNN:
         #                    validation_data=(test_images, test_labels))
 
     def train(self):
-        ds = self._ut.create_dataset(self._ut.get_training_names())
+        ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._ut.get_batch_size())
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
-        checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max',
-                                     save_freq=1000)
+        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min',
+                save_freq=1000)
         self._history = self._model.fit(ds, epochs=10,
                                         steps_per_epoch=self._ut.get_steps_per_epoch(),
                                         validation_data=validation_ds,
                                         validation_steps=self._ut.get_validation_steps(),
-                                        callbacks=[checkpoint, keras.callbacks.EarlyStopping(monitor="loss", 
-                                                                                             patience=3)])
+                                        callbacks=[checkpoint,
+                                            keras.callbacks.EarlyStopping(monitor="loss", mode="min", patience=3)])
 
-        with open('/history', 'wb') as f:
+        with open('history', 'wb') as f:
             pickle.dump(self._history.history, f)
 
     def predict(self):
