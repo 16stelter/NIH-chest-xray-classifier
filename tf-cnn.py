@@ -31,7 +31,7 @@ class TfCNN:
         self._model.summary()
 
         self._model.compile(optimizer='adam',
-                            loss='binary_crossentropy',
+                            loss='categorical_crossentropy',
                             metrics=[tf.keras.metrics.AUC(name="auc")])
 
         # self._history = self._model.fit(train_images, train_labels, epochs=10,
@@ -41,8 +41,8 @@ class TfCNN:
         ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._ut.get_batch_size())
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
-        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min',
-                save_freq=1000)
+        checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
+                save_freq='epoch')
         self._history = self._model.fit(ds, epochs=10,
                                         steps_per_epoch=self._ut.get_steps_per_epoch(),
                                         validation_data=validation_ds,
