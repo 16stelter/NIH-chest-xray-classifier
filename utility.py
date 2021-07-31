@@ -84,27 +84,21 @@ class Utility:
         # plt.imshow(ex[0] / 255.0)
         # plt.show()
 
-    @property
     def get_training_names(self):
         return self._training_names
 
-    @property
     def get_test_names(self):
         return self._test_names
 
-    @property
     def get_valid_names(self):
         return self._valid_names
 
-    @property
     def get_steps_per_epoch(self):
         return self._train_len
 
-    @property
     def get_validation_steps(self):
         return self._valid_len
 
-    @property
     def get_batch_size(self):
         return self._batch_size
 
