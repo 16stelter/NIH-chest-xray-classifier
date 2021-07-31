@@ -108,7 +108,8 @@ class CustomCNN:
                     out_y += 1
                 in_x += self._stride
                 out_x += 1
-            out_bias[f] = np.sum(bwd_in[f])
+
+            out_bias[f] = np.sum(bwd_in[:, :, f])
         return output, out_fltr, out_bias
 
     def pooling_layer(self, img):
@@ -213,7 +214,7 @@ class CustomCNN:
         for e in range(epochs):
             t = tqdm(range(self._ut.get_steps_per_epoch()))
             for j in t:
-                batch = np.asarray(next(iter(self._ut.create_dataset(self._ut.get_training_names()))))
+                batch = next(iter(self._ut.create_dataset(self._ut.get_training_names())))
                 weights, bias = self.gradient_descent(alpha, batch, weights, bias)
                 t.set_description("Cost: %f" % self._cost_history[-1])
 
@@ -225,7 +226,7 @@ cnn = CustomCNN()
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
 # print("second layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], out, np.zeros((5, 3, 3, 3)))))
-cnn.train(0.01, 10, "./weights", 2)
+cnn.train(0.01, 10, "./weights", 32)
 # print(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[1])
 # print(cnn.pooling_layer([0, 0, 0, 0, 0],
 #                     np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]),
