@@ -186,9 +186,14 @@ class CustomCNN:
         self._dbg = [0] * 8
         self._cost = 0
 
+        workers = []
         for i in range(batch[0].shape[0]-1):
             p = Process(target=self.mp_gd, args=(batch, weight_gradients, bias_gradients, i))
+            workers.append(p)
             p.start()
+
+        for p in workers:
+            p.join()
 
         for j in range(len(self._dwg)):
             weight_gradients[j] = weight_gradients[j] - alpha * self._dwg[j]
