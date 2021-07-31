@@ -6,6 +6,7 @@ from tqdm import tqdm
 import utility
 import numpy as np
 from scipy.special import softmax
+from multiprocessing import Pool, cpu_count
 
 
 class CustomCNN:
@@ -221,12 +222,15 @@ class CustomCNN:
             with open(path, 'wb') as f:
                 pickle.dump((weights, bias), f)
 
-
-cnn = CustomCNN()
+if __name__ == "__main__":
+    cnn = CustomCNN()
+    p = Pool(processes=cpu_count())
+    p.map(cnn.train(0.01, 10, ".weights", 32), range(cpu_count()))
+    #cnn.train(0.01, 10, "./weights", 32)
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
 # print("second layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], out, np.zeros((5, 3, 3, 3)))))
-cnn.train(0.01, 10, "./weights", 32)
+
 # print(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[1])
 # print(cnn.pooling_layer([0, 0, 0, 0, 0],
 #                     np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]),
