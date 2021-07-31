@@ -6,7 +6,7 @@ from tqdm import tqdm
 import utility
 import numpy as np
 from scipy.special import softmax
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Process, Manager
 
 
 class CustomCNN:
@@ -15,6 +15,10 @@ class CustomCNN:
         self._kernel_size = 2
         self._stride = 1
         self._cost_history = []
+
+        self._dwg = [0] * 8
+        self._dbg = [0] * 8
+        self._cost = 0
 
     def model(self, img, label, bias, filters):
 
@@ -178,26 +182,31 @@ class CustomCNN:
         return np.random.uniform(size=size)
 
     def gradient_descent(self, alpha, batch, weight_gradients, bias_gradients):
-        dwg = [0] * 8
-        dbg = [0] * 8
-        cost = 0
+        self._dwg = [0] * 8
+        self._dbg = [0] * 8
+        self._cost = 0
 
         for i in range(batch[0].shape[0]-1):
-            img = np.expand_dims(np.asarray(batch[0][i]), axis=0)
-            wg, bg, loss = self.model(img, batch[1][i], bias_gradients, weight_gradients)
+            p = Process(target=self.mp_gd, args=(batch, weight_gradients, bias_gradients, i))
+            p.start()
 
-            dwg = list(map(add, dwg, wg))
-            dbg = list(map(add, dbg, bg))
+        for j in range(len(self._dwg)):
+            weight_gradients[j] = weight_gradients[j] - alpha * self._dwg[j]
+            bias_gradients[j] = bias_gradients[j] - alpha * self._dbg[j]
 
-            cost += loss
-        for j in range(len(dwg)):
-            weight_gradients[j] = weight_gradients[j] - alpha * dwg[j]
-            bias_gradients[j] = bias_gradients[j] - alpha * dbg[j]
-
-        cost = cost/len(batch)
+        cost = self._cost/len(batch)
         self._cost_history.append(cost)
 
         return weight_gradients, bias_gradients
+
+    def mp_gd(self, batch, weight_gradients, bias_gradients, i):
+        img = np.expand_dims(np.asarray(batch[0][i]), axis=0)
+        wg, bg, loss = self.model(img, batch[1][i], bias_gradients, weight_gradients)
+
+        self._dwg = list(map(add, self._dwg, wg))
+        self._dbg = list(map(add, self._dbg, bg))
+
+        self._cost += loss
 
     def train(self, alpha, epochs, path, n_filters):
         weights = []  # TODO: refactor this
@@ -226,7 +235,7 @@ if __name__ == "__main__":
     cnn = CustomCNN()
     p = Pool(processes=cpu_count())
     p.map(cnn.train(0.01, 10, ".weights", 32), range(cpu_count()))
-    #cnn.train(0.01, 10, "./weights", 32)
+    #cnn.train(0.01, 10, "./weights", 3)
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
 # print("second layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], out, np.zeros((5, 3, 3, 3)))))
