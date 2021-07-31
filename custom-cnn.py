@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 import utility
 import numpy as np
+from scipy.special import softmax
 
 
 class CustomCNN:
@@ -31,9 +32,9 @@ class CustomCNN:
         conv6 = self.conv_layer(bias[5], conv5, filters[5])
         conv6[conv6 <= 0] = 0
 
-
         # calculate loss
         prediction, z, flat = self.dense_layer(conv6, filters[6:8], bias[6:8])  # i.e. 6 and 7
+        print(prediction)
         loss = self.categorical_crossentropy(prediction, label)
 
         # backpropagation
@@ -62,35 +63,35 @@ class CustomCNN:
         return weight_gradients, bias_gradients, loss
 
     def conv_layer(self, bias, img, fltr):
-        # filter shape: w, h, c, n
+        # filter shape: n, w, h, c
         fltr_n, fltr_w, fltr_h, fltr_c = fltr.shape
-        # image shape: w, h, c
-        img_w, img_h, img_c = img.shape
+        # image shape: n, w, h, c
+        img_n, img_w, img_h, img_c = img.shape
 
         output_dim = int((img_w - fltr_w) / self._stride) + 1
-        output = np.zeros((fltr_n, output_dim, output_dim))
+        output = np.zeros((fltr_n, output_dim, output_dim, img_c))
 
-        print("conv filter" + str(fltr[0].shape))
-        print("conv image" + str(img.shape))
-
-
-        for f in range(fltr_n):
-            in_x = out_x = 0
-            while in_x + fltr_w <= img_w:
-                in_y = out_y = 0
-                while in_y + fltr_h <= img_h:
-                    output[f, out_x, out_y] = np.sum(fltr[f] * img[in_x:in_x + fltr_w, in_y:in_y + fltr_h, :]) + bias[f]
-                    in_y += self._stride
-                    out_y += 1
-                in_x += self._stride
-                out_x += 1
+        for n in range(img_n):
+            for f in range(fltr_n):
+                in_x = out_x = 0
+                while in_x + fltr_w <= img_w:
+                    in_y = out_y = 0
+                    while in_y + fltr_h <= img_h:
+                        val = np.sum(fltr[f] * img[n, in_x:in_x + fltr_w, in_y:in_y + fltr_h, :], axis=(0, 1)) + bias[f]
+                        # here we need normalization, else output gets too big for softmax
+                        normalized = val / (fltr_w * fltr_h)
+                        output[f, out_x, out_y, :] = normalized
+                        in_y += self._stride
+                        out_y += 1
+                    in_x += self._stride
+                    out_x += 1
         return output
 
     def conv_layer_backprop(self, bwd_in, fwd_in, fltr):
-        # filter shape: w, h, c, n
+        # filter shape: n, w, h, c
         fltr_n, fltr_w, fltr_h, fltr_c = fltr.shape
-        # image shape: w, h, c
-        img_w, img_h, img_c = fwd_in.shape
+        # image shape: n, w, h, c
+        img_n, img_w, img_h, img_c = fwd_in.shape
 
         output = np.zeros(fwd_in.shape)
         out_fltr = np.zeros(fltr.shape)
@@ -111,20 +112,21 @@ class CustomCNN:
         return output, out_fltr, out_bias
 
     def pooling_layer(self, img):
-        img_w, img_h, img_c = img.shape
-        output_dim = int((img_w - self._kernel_size) / self._stride) + 1
-        output = np.zeros((output_dim, output_dim, img_c))
+        img_n, img_w, img_h, img_c = img.shape
+        output_dim = int((img_w - self._kernel_size) / self._kernel_size) + 1
+        output = np.zeros((img_n, output_dim, output_dim, img_c))
 
-        for c in range(img_c):
-            in_x = out_x = 0
-            while in_x + self._kernel_size <= img_w:
-                in_y = out_y = 0
-                while in_y + self._kernel_size <= img_h:
-                    output[out_x, out_y, c] = np.max(img[in_x:in_x + self._kernel_size, in_y:in_y + self._kernel_size, c])
-                    in_y += self._stride
-                    out_y += 1
-                in_x += self._stride
-                out_x += 1
+        for n in range(img_n):
+            for c in range(img_c):
+                in_x = out_x = 0
+                while in_x + self._kernel_size <= img_w:
+                    in_y = out_y = 0
+                    while in_y + self._kernel_size <= img_h:
+                        output[n, out_x, out_y, c] = np.max(img[n, in_x:in_x + self._kernel_size, in_y:in_y + self._kernel_size, c])
+                        in_y += self._kernel_size
+                        out_y += 1
+                    in_x += self._kernel_size
+                    out_x += 1
         return output
 
     def pooling_layer_backprop(self, bwd_in, fwd_in):
@@ -148,14 +150,14 @@ class CustomCNN:
 
     def dense_layer(self, img, weights, bias):
         # 1: Flattening step
-        img_w, img_h, img_c = img.shape
-        flat = img.reshape((img_w * img_h * img_c, 1))
+        img_n, img_w, img_h, img_c = img.shape
+        flat = img.reshape((img_n * img_w * img_h * img_c, 1))
         # 2: dense/relu layer
-        z = weights[0].dot(flat) + bias[0]
+        z = (weights[0].dot(flat) + bias[0]) / (weights[0][0].shape[0]+1)        # normalize here
         z[z <= 0] = 0   # ReLU
-        output = weights[1].dot(z) + bias[1]
+        output = (weights[1].dot(z) + bias[1]) / (weights[1][0].shape[0]+1)      # and here
         # 3: softmax
-        return np.exp(output)/np.sum(np.exp(output)), z, flat
+        return softmax(output), z, flat
 
     def dense_layer_backprop(self, img, flat, weights, bias, z):
         dweight2 = img.dot(z.T)
@@ -203,7 +205,7 @@ class CustomCNN:
             weights.append(self.layer_weight_init((n_filters, 3, 3, 3)))
             bias.append(self.layer_weight_init((n_filters, 1)))
 
-        weights.append(self.layer_weight_init((128, 972)))
+        weights.append(self.layer_weight_init((128, 972*n_filters)))
         bias.append(self.layer_weight_init((128, 1)))
         weights.append(self.layer_weight_init((15, 128)))
         bias.append(self.layer_weight_init((15, 1)))
@@ -223,7 +225,7 @@ cnn = CustomCNN()
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
 # print("second layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], out, np.zeros((5, 3, 3, 3)))))
-cnn.train(0.01, 10, "./weights", 64)
+cnn.train(0.01, 10, "./weights", 2)
 # print(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[1])
 # print(cnn.pooling_layer([0, 0, 0, 0, 0],
 #                     np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]),
