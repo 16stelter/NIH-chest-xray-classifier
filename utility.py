@@ -10,7 +10,7 @@ class Utility:
     machine learning tasks.
     """
     def __init__(self, path):
-        self._batch_size = 64
+        self._batch_size = 32
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
         print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
         split_ind_l = int(0.7 * len(self._filenames))
@@ -84,6 +84,28 @@ class Utility:
         # plt.imshow(ex[0] / 255.0)
         # plt.show()
 
+    def create_balanced_dataset(self, path, n_per_class):
+        ds = self.create_dataset(path)
+        out_ds = []
+        selected_per_class = np.zeros(15)
+        for i in ds:
+            for j in range(len(i)):
+                if all(selected_per_class[np.where(i[1][j] == 1)] < n_per_class):
+                    out_ds.append((i[0][j], i[1][j]))
+                    selected_per_class += np.asarray(i[1][j])
+                    if all(selected_per_class == n_per_class):
+                        output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
+                                                                output_types=(tf.float32, tf.int64),
+                                                                output_shapes=((100, 100, 3), (15)))
+                        ignore_order = tf.data.Options()
+                        ignore_order.experimental_deterministic = False
+                        output = output.with_options(ignore_order)
+                        output = output.shuffle(1024)
+                        output = output.batch(self._batch_size)
+                        return output
+
+
+
     def get_training_names(self):
         return self._training_names
 
@@ -111,4 +133,4 @@ class Utility:
 
 if __name__ == "__main__":
     ut = Utility(".")
-    ut.create_dataset(ut._training_names)
+    print(ut.create_balanced_dataset(ut._training_names, 50))
