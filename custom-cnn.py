@@ -6,7 +6,7 @@ from tqdm import tqdm
 import utility
 import numpy as np
 from scipy.special import softmax
-from multiprocessing import Pool, cpu_count, Process, Manager
+from multiprocessing import Pool, cpu_count, Process, Queue
 
 
 class CustomCNN:
@@ -15,6 +15,7 @@ class CustomCNN:
         self._kernel_size = 2
         self._stride = 1
         self._cost_history = []
+        self._q = Queue()
 
         self._dwg = [0] * 8
         self._dbg = [0] * 8
@@ -194,12 +195,12 @@ class CustomCNN:
 
 
         for p in workers:
+            self._cost += self._q.get()
             p.join()
 
         for j in range(len(self._dwg)):
             weight_gradients[j] = weight_gradients[j] - alpha * self._dwg[j]
             bias_gradients[j] = bias_gradients[j] - alpha * self._dbg[j]
-
         cost = self._cost/len(batch)
         self._cost_history.append(cost)
 
@@ -211,8 +212,7 @@ class CustomCNN:
 
         self._dwg = list(map(add, self._dwg, wg))
         self._dbg = list(map(add, self._dbg, bg))
-
-        self._cost += loss
+        self._q.put(loss)
 
     def train(self, alpha, epochs, path, n_filters):
         weights = []  # TODO: refactor this
@@ -239,8 +239,7 @@ class CustomCNN:
 
 if __name__ == "__main__":
     cnn = CustomCNN()
-    p = Pool(processes=cpu_count())
-    p.map(cnn.train(0.01, 10, ".weights", 32), range(cpu_count()))
+    cnn.train(0.01, 4, ".weights", 8)
     #cnn.train(0.01, 10, "./weights", 3)
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
