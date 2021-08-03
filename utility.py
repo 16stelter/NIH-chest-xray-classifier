@@ -147,6 +147,9 @@ class Utility:
     def get_batch_size(self):
         return self._batch_size
 
+    def get_column_names(self):
+        return list(self._df.columns)[1:]
+
     def classification_report(self, y_test, y_pred):
         y_pred_classes = np.argmax(y_pred, axis=1)
         print(y_pred_classes)
