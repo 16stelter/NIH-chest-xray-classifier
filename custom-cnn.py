@@ -6,7 +6,7 @@ from tqdm import tqdm
 import utility
 import numpy as np
 from scipy.special import softmax
-from multiprocessing import Pool, cpu_count, Process, Queue
+from multiprocessing import Pool, cpu_count, Process, Queue, Manager
 
 
 class CustomCNN:
@@ -15,7 +15,10 @@ class CustomCNN:
         self._kernel_size = 2
         self._stride = 1
         self._cost_history = []
-        self._q = Queue()
+        self._manager = Manager()
+        self._q = self._manager.Queue()
+        self._dwgq = self._manager.Queue()
+        self._dbgq = self._manager.Queue()
 
         self._dwg = [0] * 8
         self._dbg = [0] * 8
@@ -195,6 +198,10 @@ class CustomCNN:
 
         for p in workers:
             self._cost += self._q.get()
+
+            self._dwg = list(map(add, self._dwg, self._dwgq.get()))
+            self._dbg = list(map(add, self._dbg, self._dbgq.get()))
+
             p.join()
 
         for j in range(len(self._dwg)):
@@ -209,8 +216,8 @@ class CustomCNN:
         img = np.expand_dims(np.asarray(batch[0][i]), axis=0)
         wg, bg, loss = self.model(img, batch[1][i], bias_gradients, weight_gradients)
 
-        self._dwg = list(map(add, self._dwg, wg))
-        self._dbg = list(map(add, self._dbg, bg))
+        self._dwgq.put(wg)
+        self._dbgq.put(bg)
         self._q.put(loss)
 
     def train(self, alpha, epochs, path, n_filters):
@@ -233,12 +240,14 @@ class CustomCNN:
                 weights, bias = self.gradient_descent(alpha, batch, weights, bias)
                 t.set_description("Cost: %f" % self._cost_history[-1])
 
-            with open(path, 'wb') as f:
+            with open(path + "/weights", 'wb') as f:
                 pickle.dump((weights, bias), f)
-
+            with open(path + "/history", 'wb') as f:
+                pickle.dump(self._cost_history, f)
+ 
 if __name__ == "__main__":
     cnn = CustomCNN()
-    cnn.train(0.01, 4, ".weights", 8)
+    cnn.train(0.01, 4, ".", 8)
     #cnn.train(0.01, 10, "./weights", 3)
 # print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
 # out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
