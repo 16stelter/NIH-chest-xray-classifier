@@ -254,6 +254,13 @@ if __name__ == "__main__":
     cnn = CustomCNN()
     # cnn.train(0.01, 4, ".", 8)
     ds = cnn._ut.create_dataset(cnn._ut.get_test_names())
-    prediction, _, _, _ = cnn.predict(ds)
+    with open ("./experiments/2/weights", 'r') as f:
+        (weights, bias) = pickle.load(f)
+    t = tqdm(range(len(cnn._ut.get_test_names())))
+    prediction = []
+    for j in t:
+        for i in range(j[0].shape[0]-1):
+            p, _, _, _ = cnn.predict(bias, j[0][i], weights)
+            prediction.append(p)
     y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
     cnn._ut.classification_report(y_test, prediction)
