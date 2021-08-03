@@ -196,6 +196,7 @@ class CustomCNN:
             workers.append(p)
             p.start()
 
+
         for p in workers:
             self._cost += self._q.get()
 
