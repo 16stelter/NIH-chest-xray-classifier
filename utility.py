@@ -87,7 +87,7 @@ class Utility:
         # plt.imshow(ex[0] / 255.0)
         # plt.show()
 
-    def create_balanced_dataset(self, path, n_per_class):
+    def create_balanced_dataset(self, path, n_per_class, save=True):
         ds = self.create_dataset(path)
         out_ds = []
         selected_per_class = np.zeros(15)
@@ -107,6 +107,9 @@ class Utility:
                         output = output.shuffle(1024)
                         output = output.batch(self._batch_size)
                         self._train_len = len(out_ds) / self._batch_size
+                        if save:
+                            writer = tf.data.experimental.TFRecordWriter('bal_ds.tfrecord')
+                            writer.write(output)
                         return output
         output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
                                                 output_types=(tf.float32, tf.int64),
@@ -116,6 +119,8 @@ class Utility:
         output = output.batch(self._batch_size)
         print(selected_per_class)
         self._train_len = len(out_ds) / self._batch_size
+        writer = tf.data.experimental.TFRecordWriter('bal_ds.tfrecord')
+        writer.write(output)
         return output
 
 
