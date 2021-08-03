@@ -25,7 +25,36 @@ class CustomCNN:
         self._cost = 0
 
     def model(self, img, label, bias, filters):
+        prediction, z, flat, layers = self.predict(bias, img, filters)
 
+        loss = self.categorical_crossentropy(prediction, label)
+
+        # backpropagation
+        dout = prediction - np.asarray(label).reshape((15, 1))
+        dflat, dw8, db8, dw7, db7 = self.dense_layer_backprop(dout, flat, filters[6:8], bias[6:8], z)
+
+        dconv6 = dflat.reshape(layers[-1].shape)
+        dconv6[layers[-1] <= 0] = 0
+        dconv5, df6, db6 = self.conv_layer_backprop(dconv6, layers[-2], filters[5])
+        dconv5[layers[-2] <= 0] = 0
+        dpool2, df5, db5 = self.conv_layer_backprop(dconv5, layers[-3], filters[4])
+        dconv4 = self.pooling_layer_backprop(dpool2, layers[-4])
+        dconv4[layers[-4] <= 0] = 0
+        dconv3, df4, db4 = self.conv_layer_backprop(dconv4, layers[-5], filters[3])
+        dconv3[layers[-5] <= 0] = 0
+        dpool1, df3, db3 = self.conv_layer_backprop(dconv3, layers[-6], filters[2])
+        dconv2 = self.pooling_layer_backprop(dpool1, layers[-7])
+        dconv2[layers[-7] <= 0] = 0
+        dconv1, df2, db2 = self.conv_layer_backprop(dconv2, layers[-8], filters[1])
+        dconv1[layers[-8] <= 0] = 0
+        dimg, df1, db1 = self.conv_layer_backprop(dconv1, img[0], filters[0])
+
+        weight_gradients = [df1, df2, df3, df4, df5, df6, dw7, dw8]
+        bias_gradients = [db1, db2, db3, db4, db5, db6, db7, db8]
+
+        return weight_gradients, bias_gradients, loss
+
+    def predict(self, bias, img, filters):
         # forward pass
         conv1 = self.conv_layer(bias[0], img[0], filters[0])
         conv1[conv1 <= 0] = 0
@@ -42,35 +71,10 @@ class CustomCNN:
         conv6 = self.conv_layer(bias[5], conv5, filters[5])
         conv6[conv6 <= 0] = 0
 
-
         # calculate loss
         prediction, z, flat = self.dense_layer(conv6, filters[6:8], bias[6:8])  # i.e. 6 and 7
-        loss = self.categorical_crossentropy(prediction, label)
-
-        # backpropagation
-        dout = prediction - np.asarray(label).reshape((15, 1))
-        dflat, dw8, db8, dw7, db7 = self.dense_layer_backprop(dout, flat, filters[6:8], bias[6:8], z)
-
-        dconv6 = dflat.reshape(conv6.shape)
-        dconv6[conv6 <= 0] = 0
-        dconv5, df6, db6 = self.conv_layer_backprop(dconv6, conv5, filters[5])
-        dconv5[conv5 <= 0] = 0
-        dpool2, df5, db5 = self.conv_layer_backprop(dconv5, pool2, filters[4])
-        dconv4 = self.pooling_layer_backprop(dpool2, conv4)
-        dconv4[conv4 <= 0] = 0
-        dconv3, df4, db4 = self.conv_layer_backprop(dconv4, conv3, filters[3])
-        dconv3[conv3 <= 0] = 0
-        dpool1, df3, db3 = self.conv_layer_backprop(dconv3, pool1, filters[2])
-        dconv2 = self.pooling_layer_backprop(dpool1, conv2)
-        dconv2[conv2 <= 0] = 0
-        dconv1, df2, db2 = self.conv_layer_backprop(dconv2, conv1, filters[1])
-        dconv1[conv1 <= 0] = 0
-        dimg, df1, db1 = self.conv_layer_backprop(dconv1, img[0], filters[0])
-
-        weight_gradients = [df1, df2, df3, df4, df5, df6, dw7, dw8]
-        bias_gradients = [db1, db2, db3, db4, db5, db6, db7, db8]
-
-        return weight_gradients, bias_gradients, loss
+        layers = [conv1, conv2, pool1, conv3, conv4, pool2, conv5, conv6]
+        return prediction, z, flat, layers
 
     def conv_layer(self, bias, img, fltr):
         # filter shape: w, h, c, n
@@ -248,13 +252,8 @@ class CustomCNN:
  
 if __name__ == "__main__":
     cnn = CustomCNN()
-    cnn.train(0.01, 4, ".", 8)
-    #cnn.train(0.01, 10, "./weights", 3)
-# print("first layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3))).shape))
-# out = cnn.conv_layer([0, 0, 0, 0, 0], np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]), np.zeros((5, 3, 3, 3)))
-# print("second layer out" + str(cnn.conv_layer([0, 0, 0, 0, 0], out, np.zeros((5, 3, 3, 3)))))
-
-# print(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[1])
-# print(cnn.pooling_layer([0, 0, 0, 0, 0],
-#                     np.asarray(next(iter(cnn._ut.create_dataset(cnn._ut.get_training_names())))[0][0]),
-#                     np.zeros((5, 3, 3, 3))).shape)
+    # cnn.train(0.01, 4, ".", 8)
+    ds = cnn._ut.create_dataset(cnn._ut.get_test_names())
+    prediction, _, _, _ = cnn.predict(ds)
+    y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
+    cnn._ut.classification_report(y_test, prediction)
