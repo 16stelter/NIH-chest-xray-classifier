@@ -3,30 +3,33 @@ import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import classification_report
 
-
 class Utility:
     """
     This class provides several utility functions for handling tfrecord files and methods that are common with all
     machine learning tasks.
     """
     def __init__(self, path):
-        self._batch_size = 32
+        self._batch_size = 64
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
         print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
         split_ind_l = int(0.7 * len(self._filenames))
         split_ind_r = int(0.9 * len(self._filenames))
         self._training_names, self._valid_names, self._test_names = self._filenames[:split_ind_l], \
                                                                     self._filenames[split_ind_l:split_ind_r], \
-                                                                    self._filenames[-1]
+                                                                    self._filenames[split_ind_r:-1]
         print("\033[92m I found %d training, %d validation and %d test .tfrecord files. \033[00m" % (
         len(self._training_names), len(self._valid_names), len(self._test_names)))
         self._df = pd.read_csv(path + "/preprocessed_data.csv")
         self._df.rename(columns={'Unnamed: 0': 'image'}, inplace=True)
 
+        print(np.asarray(tf.data.TFRecordDataset(self._test_names)))
+
         self._train_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(self._training_names)) / self._batch_size))
         self._valid_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(self._valid_names)) /self._batch_size))
+        self._test_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(self._test_names)) / self._batch_size))
         print("\033[92m Steps per epoch: " + str(self._train_len) + "\033[00m")
         print("\033[92m Validation steps: " + str(self._valid_len) + "\033[00m")
+        print("\033[92m Test steps: " + str(self._test_len) + "\033[00m")
 
     def read_tfrecord(self, sample):
         """
@@ -88,21 +91,32 @@ class Utility:
         ds = self.create_dataset(path)
         out_ds = []
         selected_per_class = np.zeros(15)
+        ignore_order = tf.data.Options()
+        ignore_order.experimental_deterministic = False
         for i in ds:
             for j in range(len(i)):
-                if all(selected_per_class[np.where(i[1][j] == 1)] < n_per_class):
+                if all(x < n_per_class for x in selected_per_class[np.where(i[1][j] == 1)]):
                     out_ds.append((i[0][j], i[1][j]))
                     selected_per_class += np.asarray(i[1][j])
-                    if all(selected_per_class == n_per_class):
+                    if all(y == n_per_class for y in selected_per_class):
                         output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
                                                                 output_types=(tf.float32, tf.int64),
                                                                 output_shapes=((100, 100, 3), (15)))
-                        ignore_order = tf.data.Options()
-                        ignore_order.experimental_deterministic = False
                         output = output.with_options(ignore_order)
                         output = output.shuffle(1024)
                         output = output.batch(self._batch_size)
+                        self._train_len = len(out_ds) / self._batch_size
                         return output
+        output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
+                                                output_types=(tf.float32, tf.int64),
+                                                output_shapes=((100, 100, 3), (15)))
+        output = output.with_options(ignore_order)
+        output = output.shuffle(1024)
+        output = output.batch(self._batch_size)
+        print(selected_per_class)
+        self._train_len = len(out_ds) / self._batch_size
+        return output
+
 
 
 
@@ -120,6 +134,9 @@ class Utility:
 
     def get_validation_steps(self):
         return self._valid_len
+
+    def get_test_steps(self):
+        return self._test_len
 
     def get_batch_size(self):
         return self._batch_size

@@ -249,18 +249,29 @@ class CustomCNN:
                 pickle.dump((weights, bias), f)
             with open(path + "/history", 'wb') as f:
                 pickle.dump(self._cost_history, f)
+
+    def predict_mp(self, bias, img, weights):
+        p, _, _, _ = self.predict(bias, img, weights)
+        self._q.put(p)
  
 if __name__ == "__main__":
     cnn = CustomCNN()
     # cnn.train(0.01, 4, ".", 8)
     ds = cnn._ut.create_dataset(cnn._ut.get_test_names())
-    with open ("./experiments/2/weights", 'r') as f:
+    with open ("./experiments/2/weights", 'rb') as f:
         (weights, bias) = pickle.load(f)
-    t = tqdm(range(len(cnn._ut.get_test_names())))
+    t = tqdm(range(cnn._ut.get_test_steps()))
     prediction = []
     for j in t:
-        for i in range(j[0].shape[0]-1):
-            p, _, _, _ = cnn.predict(bias, j[0][i], weights)
-            prediction.append(p)
+        batch = next(iter(ds))
+        workers = []
+        for i in range(batch[0].shape[0]-1):
+            p = Process(target=cnn.predict_mp, args=(bias, (batch[0][i], batch[1][i]), weights))
+            workers.append(p)
+            p.start()
+
+        for p in workers:
+            prediction.append(cnn._q.get())
+            p.join()
     y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
     cnn._ut.classification_report(y_test, prediction)

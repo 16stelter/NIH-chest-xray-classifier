@@ -12,8 +12,11 @@ class TfCNN:
     def __init__(self):
         self._model = models.Sequential()
         self._ut = utility.Utility(".")
-        self.initialize_model()
         self._history = 0
+        self._learning_rate = 0.00001
+        self._epochs = 10
+        self.initialize_model()
+
 
     def initialize_model(self):
         self._model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(100, 100, 3)))
@@ -29,21 +32,21 @@ class TfCNN:
         self._model.add(layers.Dense(15, activation='sigmoid'))
 
         self._model.summary()
-
-        self._model.compile(optimizer='adam',
+        
+        optimizer = keras.optimizers.Adam(lr=self._learning_rate)
+        self._model.compile(optimizer=optimizer,
                             loss='categorical_crossentropy',
                             metrics=[tf.keras.metrics.AUC(name="auc")])
 
-        # self._history = self._model.fit(train_images, train_labels, epochs=10,
-        #                    validation_data=(test_images, test_labels))
-
     def train(self):
-        ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._ut.get_batch_size())
+        # 6595 = average over all classes
+        print("\033[33m Generating dataset. If you are using create_balanced_dataset, this may take a while... \033[00m") 
+        ds = self._ut.create_balanced_dataset(self._ut.get_training_names(), 6595).repeat(self._epochs)
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
                 save_freq='epoch')
-        self._history = self._model.fit(ds, epochs=10,
+        self._history = self._model.fit(ds, epochs=self._epochs,
                                         steps_per_epoch=self._ut.get_steps_per_epoch(),
                                         validation_data=validation_ds,
                                         validation_steps=self._ut.get_validation_steps(),
