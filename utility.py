@@ -93,11 +93,12 @@ class Utility:
         selected_per_class = np.zeros(15)
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
-        for i in ds:
-            for j in range(len(i)):
-                if all(x < n_per_class for x in selected_per_class[np.where(i[1][j] == 1)]):
-                    out_ds.append((i[0][j], i[1][j]))
-                    selected_per_class += np.asarray(i[1][j])
+        for i in range(int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(path)) / self._batch_size))):
+            batch = next(iter(ds))
+            for j in range(len(batch)):
+                if all(x < n_per_class for x in selected_per_class[np.where(batch[1][j] == 1)]):
+                    out_ds.append((batch[0][j], batch[1][j]))
+                    selected_per_class += np.asarray(batch[1][j])
                     if all(y == n_per_class for y in selected_per_class):
                         output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
                                                                 output_types=(tf.float32, tf.int64),
@@ -150,4 +151,4 @@ class Utility:
 
 if __name__ == "__main__":
     ut = Utility(".")
-    print(ut.create_balanced_dataset(ut._training_names, 50))
+    print(ut.create_balanced_dataset(ut._training_names, 2000))
