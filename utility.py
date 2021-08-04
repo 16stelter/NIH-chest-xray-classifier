@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import classification_report, confusion_matrix
+from tqdm import tqdm
 
 class Utility:
     """
@@ -88,12 +89,15 @@ class Utility:
         # plt.show()
 
     def create_balanced_dataset(self, path, n_per_class, save=True):
+        print("\033[93m Generating balanced dataset of siza %d per class. \033[00m" % n_per_class)
         ds = self.create_dataset(path)
         out_ds = []
         selected_per_class = np.zeros(15)
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
-        for i in range(int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(path)) / self._batch_size))):
+        ds_len = int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(path)) / self._batch_size))
+        t = tqdm(range(ds_len))
+        for i in t:
             batch = next(iter(ds))
             for j in range(len(batch[0])):
                 if all(x < n_per_class for x in selected_per_class[np.where(batch[1][j] == 1)]):
@@ -118,9 +122,10 @@ class Utility:
         output = output.shuffle(1024)
         output = output.batch(self._batch_size)
         print(selected_per_class)
+        if save:
+            print(output.element_spec)
+            tf.data.experimental.save(output, "./bal_ds")
         self._train_len = len(out_ds) / self._batch_size
-        writer = tf.data.experimental.TFRecordWriter('bal_ds.tfrecord')
-        writer.write(output)
         return output
 
 
