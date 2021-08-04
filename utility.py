@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 class Utility:
     """
@@ -145,7 +145,7 @@ class Utility:
     def classification_report(self, y_test, y_pred):
         y_pred_classes = np.argmax(y_pred, axis=1)
         print(y_pred_classes)
-
+        print(confusion_matrix(y_test, y_pred_classes))
         print(classification_report(y_test, y_pred_classes))
 
 

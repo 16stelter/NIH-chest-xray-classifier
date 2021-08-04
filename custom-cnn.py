@@ -252,7 +252,8 @@ class CustomCNN:
 
     def predict_mp(self, bias, img, weights):
         p, _, _, _ = self.predict(bias, img, weights)
-        self._q.put(p)
+
+        self._q.put((p, img[1]))
  
 if __name__ == "__main__":
     cnn = CustomCNN()
@@ -262,6 +263,7 @@ if __name__ == "__main__":
         (weights, bias) = pickle.load(f)
     t = tqdm(range(cnn._ut.get_test_steps()))
     prediction = []
+    labels = []
     for j in t:
         batch = next(iter(ds))
         workers = []
@@ -271,7 +273,8 @@ if __name__ == "__main__":
             p.start()
 
         for p in workers:
-            prediction.append(cnn._q.get())
+            (y_pred, y_test) = cnn._q.get()
+            prediction.append(y_pred)
+            labels.append(np.argmax(y_test))
             p.join()
-    y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
-    cnn._ut.classification_report(y_test, prediction)
+    cnn._ut.classification_report(labels, prediction)

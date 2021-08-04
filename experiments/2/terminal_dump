@@ -1,0 +1,71 @@
+teps per epoch: 1225
+ Validation steps: 350
+ Test steps: 172
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 172/172 [2:17:42<00:00, 48.04s/it]
+[[0]
+ [0]
+ [0]
+ ...
+ [0]
+ [0]
+ [0]]
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+              precision    recall  f1-score   support
+
+           0       0.53      1.00      0.70      5794
+           1       0.00      0.00      0.00      1102
+           2       0.00      0.00      0.00       521
+           3       0.00      0.00      0.00      1411
+           4       0.00      0.00      0.00       407
+           5       0.00      0.00      0.00        32
+           6       0.00      0.00      0.00       117
+           7       0.00      0.00      0.00        78
+           8       0.00      0.00      0.00       513
+           9       0.00      0.00      0.00        63
+          10       0.00      0.00      0.00       122
+          11       0.00      0.00      0.00        66
+          12       0.00      0.00      0.00       358
+          13       0.00      0.00      0.00       238
+          14       0.00      0.00      0.00        14
+
+    accuracy                           0.53     10836
+   macro avg       0.04      0.07      0.05     10836
+weighted avg       0.29      0.53      0.37     10836
+
+
+[[5787    0    0    0    0    0    0    0    0    0    0    0    0    0                                                                                                                                     
+     0]                                                                                                                                                                                                     
+ [1075    0    0    0    0    0    0    0    0    0    0    0    0    0                                                                                                                                     
+     0]                                                                                                                                                                                                     
+ [ 504    0    0    0    0    0    0    0    0    0    0    0    0    0                                                                                                                                     
+     0]                                                                                                                                                                                                     
+ [1416    0    0    0    0    0    0    0    0    0    0    0    0    0                                                                                                                                     
+     0]                                                                                                                                                                                                     
+ [ 450    0    0    0    0    0    0    0    0    0    0    0    0    0                                                                                                                                     
+     0]
+ [  51    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [ 128    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [  71    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [ 474    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [  81    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [ 145    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [  60    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [ 341    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [ 242    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]
+ [  11    0    0    0    0    0    0    0    0    0    0    0    0    0
+     0]]
+
