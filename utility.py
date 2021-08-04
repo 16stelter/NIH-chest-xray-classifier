@@ -95,7 +95,7 @@ class Utility:
         ignore_order.experimental_deterministic = False
         for i in range(int(np.ceil(sum(1 for _ in tf.data.TFRecordDataset(path)) / self._batch_size))):
             batch = next(iter(ds))
-            for j in range(len(batch)):
+            for j in range(len(batch[0])):
                 if all(x < n_per_class for x in selected_per_class[np.where(batch[1][j] == 1)]):
                     out_ds.append((batch[0][j], batch[1][j]))
                     selected_per_class += np.asarray(batch[1][j])
@@ -108,8 +108,8 @@ class Utility:
                         output = output.batch(self._batch_size)
                         self._train_len = len(out_ds) / self._batch_size
                         if save:
-                            writer = tf.data.experimental.TFRecordWriter('bal_ds.tfrecord')
-                            writer.write(output)
+                            print(output.element_spec)
+                            tf.data.experimental.save(output, "./bal_ds")
                         return output
         output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
                                                 output_types=(tf.float32, tf.int64),
@@ -159,4 +159,4 @@ class Utility:
 
 if __name__ == "__main__":
     ut = Utility(".")
-    print(ut.create_balanced_dataset(ut._training_names, 2000))
+    print(ut.create_balanced_dataset(ut._training_names, 6959))

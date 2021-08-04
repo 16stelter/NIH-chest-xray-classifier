@@ -41,7 +41,7 @@ class TfCNN:
     def train(self):
         # 6595 = average over all classes
         print("\033[33m Generating dataset. If you are using create_balanced_dataset, this may take a while... \033[00m") 
-        ds = self._ut.create_balanced_dataset(self._ut.get_training_names(), 6595).repeat(self._epochs)
+        ds = self._ut.create_balanced_dataset(self._ut.get_training_names(), 6595, save=True).repeat(self._epochs)
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
