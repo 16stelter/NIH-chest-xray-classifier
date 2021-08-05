@@ -10,7 +10,7 @@ class Utility:
     machine learning tasks.
     """
     def __init__(self, path):
-        self._batch_size = 64
+        self._batch_size = 128
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
         print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
         split_ind_l = int(0.7 * len(self._filenames))
@@ -80,7 +80,7 @@ class Utility:
         ds = ds.with_options(
             ignore_order
         )
-        ds = ds.shuffle(1024)
+        ds = ds.shuffle(2048)
         ds = ds.batch(self._batch_size)
         return ds
         # ex = next(iter(ds))
