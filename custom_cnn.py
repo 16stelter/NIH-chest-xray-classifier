@@ -271,7 +271,6 @@ if __name__ == "__main__":
             p = Process(target=cnn.predict_mp, args=(bias, (batch[0][i], batch[1][i]), weights))
             workers.append(p)
             p.start()
-
         for p in workers:
             (y_pred, y_test) = cnn._q.get()
             prediction.append(y_pred)
