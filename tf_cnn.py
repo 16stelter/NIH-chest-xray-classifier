@@ -14,7 +14,7 @@ class TfCNN:
         self._model = models.Sequential()
         self._ut = utility.Utility(".")
         self._history = 0
-        self._learning_rate = 0.00001
+        self._learning_rate = 0.001
         self._epochs = 25
         self.initialize_model()
 
@@ -54,7 +54,7 @@ class TfCNN:
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
-                save_freq='epoch')
+                save_freq='epoch', save_weights_only=True)
         #y_true = np.concatenate([y for x, y in ds], axis=0)
         #print(y_true)
         #class_weights = class_weight.compute_class_weight('balanced',

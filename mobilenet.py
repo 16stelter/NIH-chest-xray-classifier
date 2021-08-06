@@ -14,13 +14,13 @@ class MNetCNN:
         self._ut = utility.Utility(".")
         self._history = 0
         self._learning_rate = 0.00001
-        self._epochs = 25
+        self._epochs = 10
         self.initialize_model()
 
     def initialize_model(self):
-        self._model.add(base_mobilenet_model = MobileNet(input_shape=(100, 100, 3),
-                                                         include_top=False,
-                                                         weights=None))
+        self._model.add(MobileNet(input_shape=(100, 100, 3),
+                                               include_top=False,
+                                               weights=None))
         self._model.add(layers.GlobalAveragePooling2D())
         self._model.add(layers.Dense(512))
         self._model.add(layers.Dense(15, activation = 'sigmoid'))
@@ -61,3 +61,9 @@ class MNetCNN:
         y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
         y_pred = self._model.predict(ds)
         return y_test, y_pred
+
+if __name__ == "__main__":
+    cnn = MNetCNN()
+    cnn.train()
+    y_test, y_pred = cnn.predict()
+    cnn._ut.classification_report(y_test, y_pred)
