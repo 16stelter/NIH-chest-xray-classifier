@@ -1,17 +1,16 @@
+import keras
 import numpy as np
 import optuna
 from optuna.samplers import TPESampler
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.callbacks import ModelCheckpoint
-from tensorflow.python.keras.optimizers import Adam
 import tensorflow as tf
 import utility
 
 
 class Objective(object):
-    def __init__(self, calib_ds, path):
+    def __init__(self, calib_ds):
         self.ds = calib_ds
-        self.path = path
         self._model = models.Sequential()
 
     def __call__(self, trial):
@@ -50,14 +49,16 @@ class Objective(object):
         self._model.add(layers.Dense(dict_params['n_dense'], activation='relu'))
         self._model.add(layers.Dense(15, activation='sigmoid'))
 
-        opt = Adam(lr=dict_params['learning_rate'])
-        self._model.compile(optimizer=opt, loss=self.loss, metrics=['auc'])
+        opt = keras.optimizers.Adam(lr=dict_params['learning_rate'])
+        self._model.compile(optimizer=opt, loss=self.loss, metrics=[tf.keras.metrics.AUC(name="auc")])
 
         filepath = "./weights"
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='max',
                                      save_freq='epoch')
-        self._history = self._model.fit(self.ds, epochs=self._epochs,
-                                        steps_per_epoch=1024/dict_params['batch_size'],
+        print(tf.data.experimental.cardinality(self.ds).numpy())
+        print(dict_params['batch_size'])
+        self._history = self._model.fit(self.ds, epochs=2,
+                                        steps_per_epoch=tf.data.experimental.cardinality(self.ds).numpy()/dict_params['batch_size'],
                                         callbacks=[checkpoint])
 
         loss = np.min(self._history['loss'])
@@ -74,9 +75,11 @@ opt_direction = 'minimize'
 n_random = 25
 max_time = 4*60*60
 
-_ut = utility.Utility()
-cal_ds = _ut.create_balanced_dataset(_ut.get_training_names(), 110).repeat(1000)
-objective = Objective(cal_ds, "./optuna/obj")
+_ut = utility.Utility(".")
+#cal_ds = _ut.create_balanced_dataset(_ut.get_training_names(), 110)
+cal_ds = tf.data.experimental.load("./cal_ds", (tf.TensorSpec(shape=(None, 100, 100, 3), dtype=tf.float32, name=None), tf.TensorSpec(shape=(None, 15), dtype=tf.int64, name=None))).repeat(1000)
+
+objective = Objective(cal_ds)
 
 study = optuna.create_study(direction=opt_direction, sampler=TPESampler(n_startup_trials=n_random))
 

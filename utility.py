@@ -113,8 +113,8 @@ class Utility:
                         self._train_len = len(out_ds) / self._batch_size
                         if save:
                             print(output.element_spec)
-                            tf.data.experimental.save(output, "./bal_ds")
-                        return output
+                            tf.data.experimental.save(output, "./cal_ds")
+                        return output, len(out_ds)
         output = tf.data.Dataset.from_generator(lambda: ((x, y) for (x, y) in out_ds),
                                                 output_types=(tf.float32, tf.int64),
                                                 output_shapes=((100, 100, 3), (15)))
@@ -124,7 +124,7 @@ class Utility:
         print(selected_per_class)
         if save:
             print(output.element_spec)
-            tf.data.experimental.save(output, "./bal_ds")
+            tf.data.experimental.save(output, "./cal_ds")
         self._train_len = len(out_ds) / self._batch_size
         return output
 
