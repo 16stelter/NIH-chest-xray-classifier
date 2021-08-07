@@ -18,14 +18,12 @@ class Objective(object):
         n_filters = trial.suggest_categorical('n_filters', [16, 32, 64, 128])
         kernel_size = trial.suggest_int('kernel_size', 2, 4)
         n_dense = trial.suggest_categorical('n_dense', [64, 128, 256, 512, 1024])
-        batch_size = trial.suggest_categorical('batch_size', [64, 128, 256])
         learning_rate = trial.suggest_float('learning_rate', 1 * 10 ** -8, 0.1)
 
         dict_params = {'n_additional_layers': n_additional_layers,
                        'n_filters': n_filters,
                        'kernel_size': kernel_size,
                        'n_dense': n_dense,
-                       'batch_size': batch_size,
                        'learning_rate': learning_rate}
         self._model = models.Sequential()
         self._model.add(layers.Conv2D(dict_params['n_filters'],
@@ -58,7 +56,7 @@ class Objective(object):
         print(tf.data.experimental.cardinality(self.ds).numpy())
         print(dict_params)
         self._history = self._model.fit(self.ds, epochs=2,
-                                        steps_per_epoch=tf.data.experimental.cardinality(self.ds).numpy()/dict_params['batch_size'],
+                                        steps_per_epoch=tf.data.experimental.cardinality(self.ds).numpy(),
                                         callbacks=[checkpoint])
 
         loss = np.min(self._history.history['loss'])
