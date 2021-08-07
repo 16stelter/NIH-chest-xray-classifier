@@ -18,7 +18,7 @@ class Objective(object):
         n_filters = trial.suggest_categorical('n_filters', [16, 32, 64, 128])
         kernel_size = trial.suggest_int('kernel_size', 2, 4)
         n_dense = trial.suggest_categorical('n_dense', [64, 128, 256, 512, 1024])
-        batch_size = trial.suggest_categorical('batch_size', [32, 64, 128, 256])
+        batch_size = trial.suggest_categorical('batch_size', [64, 128, 256])
         learning_rate = trial.suggest_float('learning_rate', 1 * 10 ** -8, 0.1)
 
         dict_params = {'n_additional_layers': n_additional_layers,
@@ -27,7 +27,7 @@ class Objective(object):
                        'n_dense': n_dense,
                        'batch_size': batch_size,
                        'learning_rate': learning_rate}
-
+        self._model = models.Sequential()
         self._model.add(layers.Conv2D(dict_params['n_filters'],
                                       (dict_params['kernel_size'], dict_params['kernel_size']),
                                       activation='relu',
@@ -56,12 +56,12 @@ class Objective(object):
         checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='max',
                                      save_freq='epoch')
         print(tf.data.experimental.cardinality(self.ds).numpy())
-        print(dict_params['batch_size'])
+        print(dict_params)
         self._history = self._model.fit(self.ds, epochs=2,
                                         steps_per_epoch=tf.data.experimental.cardinality(self.ds).numpy()/dict_params['batch_size'],
                                         callbacks=[checkpoint])
 
-        loss = np.min(self._history['loss'])
+        loss = np.min(self._history.history['loss'])
         return loss
 
     def loss(self, y_true, y_pred):
@@ -73,7 +73,7 @@ early_stop = 10
 lr_epochs = 5
 opt_direction = 'minimize'
 n_random = 25
-max_time = 4*60*60
+max_time = 6*60*60
 
 _ut = utility.Utility(".")
 #cal_ds = _ut.create_balanced_dataset(_ut.get_training_names(), 110)
@@ -87,4 +87,4 @@ study.optimize(objective, timeout=max_time)
 
 result = study.trials_dataframe()
 result.to_pickle("./optuna/results.pkl")
-result.to_csv(".optuna/results.csv")
+result.to_csv("./optuna/results.csv")
