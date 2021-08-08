@@ -9,6 +9,9 @@ from keras.applications.mobilenet import MobileNet
 
 
 class MNetCNN:
+    """
+    Mobilenet implementation for the NIH chest xray classification problem.
+    """
     def __init__(self):
         self._model = models.Sequential()
         self._ut = utility.Utility(".")
@@ -18,6 +21,9 @@ class MNetCNN:
         self.initialize_model()
 
     def initialize_model(self):
+        """
+        Generates and compiles the model.
+        """
         self._model.add(MobileNet(input_shape=(100, 100, 3),
                                                include_top=False,
                                                weights=None))
@@ -29,6 +35,9 @@ class MNetCNN:
                             metrics=['binary_accuracy', 'mae'])
 
     def train(self):
+        """
+        Trains the model. Saves weights and history.
+        """
         print("\033[33m Generating dataset. If you are using create_balanced_dataset, this may take a while... \033[00m")
         ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._epochs)
 
@@ -42,6 +51,8 @@ class MNetCNN:
         class_weights = [0.1237545, 0.63923679, 2.22684278, 0.47803896, 2.06822319, 6.58236776,
                          6.04907407, 7.05317139, 1.31780131, 20.02452107, 5.08899708, 6.51670823,
                          2.39743119, 3.55537415, 68.76842105]
+        # These weights have been calculated once, recalculating takes too much time and is not necessary, since the set
+        # does not change.
 
         class_weights = {i : class_weights[i] for i in range(len(class_weights))}
         print(class_weights)
@@ -57,6 +68,10 @@ class MNetCNN:
             pickle.dump(self._history.history, f)
 
     def predict(self):
+        """
+        Makes predictions on the test dataset.
+        :return: True labels, predicted labels
+        """
         ds = self._ut.create_dataset(self._ut.get_test_names())
         y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
         y_pred = self._model.predict(ds)

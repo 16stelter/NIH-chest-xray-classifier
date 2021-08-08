@@ -10,12 +10,12 @@ class Utility:
     machine learning tasks.
     """
     def __init__(self, path):
-        self._batch_size = 64
+        self._batch_size = 1
         self._filenames = tf.io.gfile.glob(path + "/data/*.tfrec")
         print("\033[92m There are %d total .tfrecord files. \033[00m" % (len(self._filenames)))
         split_ind_l = int(0.7 * len(self._filenames))
         split_ind_r = int(0.9 * len(self._filenames))
-        self._training_names, self._valid_names, self._test_names = self._filenames[:split_ind_l], \
+        self._training_names, self._valid_names, self._test_names = self._filenames[0], \
                                                                     self._filenames[split_ind_l:split_ind_r], \
                                                                     self._filenames[split_ind_r:-1]
         print("\033[92m I found %d training, %d validation and %d test .tfrecord files. \033[00m" % (
@@ -82,13 +82,23 @@ class Utility:
         )
         ds = ds.shuffle(2048)
         ds = ds.batch(self._batch_size)
-        return ds
+        print(ds.take(1))
+        return ds.take(1)
         # ex = next(iter(ds))
         # print(ex[1:])
         # plt.imshow(ex[0] / 255.0)
         # plt.show()
 
     def create_balanced_dataset(self, path, n_per_class, save=True):
+        """
+        Generates a dataset with equal amounts of samples per class. If no more samples of one class are present,
+        the generator keeps filling up the other classes anyway.
+
+        :param path: The path of the original dataset
+        :param n_per_class: Number of samples that should be in each class
+        :param save: Whether the dataset should be written to disk
+        :return: Dataset of shape (number of classes, n_per_class)
+        """
         print("\033[93m Generating balanced dataset of siza %d per class. \033[00m" % n_per_class)
         ds = self.create_dataset(path)
         out_ds = []
@@ -128,9 +138,6 @@ class Utility:
         self._train_len = len(out_ds) / self._batch_size
         return output
 
-
-
-
     def get_training_names(self):
         return self._training_names
 
@@ -156,6 +163,12 @@ class Utility:
         return list(self._df.columns)[1:]
 
     def classification_report(self, y_test, y_pred):
+        """
+        Generates and prints various metrics from a prediction.
+
+        :param y_test: The true labels of the test dataset
+        :param y_pred: The predicted labels of the test dataset
+        """
         y_pred_classes = np.argmax(y_pred, axis=1)
         print(y_pred_classes)
         print(confusion_matrix(y_test, y_pred_classes))

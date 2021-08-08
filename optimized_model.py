@@ -28,9 +28,6 @@ class OptunaModel:
         opt = keras.optimizers.Adam(lr=0.003460515573512333)
         self._model.compile(optimizer=opt, loss="binary_crossentropy", metrics=[tf.keras.metrics.AUC(name="auc")])
 
-    def loss(self, y_true, y_pred):
-        return tf.nn.sparse_softmax_cross_entropy_with_logits(tf.argmax(y_true, 1), y_pred)
-
     def train(self):
         ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._epochs)
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
