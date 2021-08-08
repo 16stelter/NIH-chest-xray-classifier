@@ -49,19 +49,14 @@ class Objective(object):
         self._model.compile(optimizer=opt, loss="binary_crossentropy", metrics=[tf.keras.metrics.AUC(name="auc")])
 
         filepath = "./weights"
-        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='max',
-                                     save_freq='epoch')
+        checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min',
+                                     save_freq='epoch', save_weights_only=True)
         print(tf.data.experimental.cardinality(self.ds).numpy())
         print(dict_params)
-        class_weights = [0.1237545, 0.63923679, 2.22684278, 0.47803896, 2.06822319, 6.58236776,
-                         6.04907407, 7.05317139, 1.31780131, 20.02452107, 5.08899708, 6.51670823,
-                         2.39743119, 3.55537415, 68.76842105]
 
-        class_weights = {i : class_weights[i] for i in range(len(class_weights))}
         self._history = self._model.fit(self.ds, epochs=2,
-                                        steps_per_epoch=200,
-                                        callbacks=[checkpoint],
-                                        class_weight=class_weights)
+                                        steps_per_epoch=tf.data.experimental.cardinality(self.ds).numpy()/64,
+                                        callbacks=[checkpoint])
 
         loss = np.min(self._history.history['loss'])
         return loss
@@ -74,13 +69,13 @@ max_epochs = 1000
 early_stop = 10
 lr_epochs = 5
 opt_direction = 'minimize'
-n_random = 25
+n_random = 10
 max_time = 5*60*60
 
 _ut = utility.Utility(".")
 cal_ds = tf.data.experimental.load("./cal_ds", (tf.TensorSpec(shape=(None, 100, 100, 3), dtype=tf.float32, name=None), tf.TensorSpec(shape=(None, 15), dtype=tf.int64, name=None))).repeat(1000)
 
-objective = Objective(_ut.create_dataset(_ut.get_training_names()).repeat(1000))
+objective = Objective(cal_ds)
 
 study = optuna.create_study(direction=opt_direction, sampler=TPESampler(n_startup_trials=n_random))
 
