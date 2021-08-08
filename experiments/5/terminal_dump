@@ -1,0 +1,66 @@
+[ 8 11 13 ...  8 13  8]                                                                                                                                                                                     
+[[   0   10    0   41  217  719    0    9 1123    0    0  595    4 3110                                                                                                                                     
+    31]                                                                                                                                                                                                     
+ [   0    3    0    9   28  142    0    3  218    0    0  111    0  611                                                                                                                                     
+     3]                                                                                                                                                                                                     
+ [   0    0    0    1   11   40    0    0   81    0    0   34    0  189                                                                                                                                     
+     1]                                                                                                                                                                                                     
+ [   0    2    0   12   57  190    0    1  277    0    0  145    0  851                                                                                                                                     
+     5]                                                                                                                                                                                                     
+ [   0    0    0    5   16   35    0    0   65    0    0   33    0  215                                                                                                                                     
+     1]                                                                                                                                                                                                     
+ [   0    0    0    1    7   10    0    0   19    0    0   11    0   54                                                                                                                                     
+     2]                                                                                                                                                                                                     
+ [   0    0    0    2    8   11    0    0   24    0    0   15    0   56                                                                                                                                     
+     1]                                                                                                                                                                                                     
+ [   0    0    0    2    6   11    0    0   23    0    0   10    0   51
+     0]
+ [   0    0    0    3   20   69    0    2   96    0    0   54    0  294
+     5]
+ [   0    0    0    0    1    4    0    0    6    0    0    3    0   18
+     0]
+ [   0    0    0    3    2   17    0    0   29    0    0   11    0   72
+     2]
+ [   0    0    0    0    5   15    0    0   19    0    0    8    0   59
+     0]
+ [   0    0    0    4    7   32    0    2   61    0    0   37    1  176
+     3]
+ [   0    0    0    2    8   21    0    0   44    0    0   22    0  121
+     0]
+ [   0    0    0    1    1    3    0    0    1    0    0    1    0    6
+
+
+ion and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Us 
+e `zero_division` parameter to control this behavior.                                                 
+  _warn_prf(average, modifier, msg_start, len(result))
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarnin 
+g: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Us 
+e `zero_division` parameter to control this behavior.                                                 
+  _warn_prf(average, modifier, msg_start, len(result))
+/usr/local/lib/python3.8/dist-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarnin 
+g: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Us 
+e `zero_division` parameter to control this behavior.                                                 
+  _warn_prf(average, modifier, msg_start, len(result))
+              precision    recall  f1-score   support
+
+           0       0.00      0.00      0.00      5859
+           1       0.20      0.00      0.01      1128
+           2       0.00      0.00      0.00       357
+           3       0.14      0.01      0.01      1540
+           4       0.04      0.04      0.04       370
+           5       0.01      0.10      0.01       104
+           6       0.00      0.00      0.00       117
+           7       0.00      0.00      0.00       103
+           8       0.05      0.18      0.07       543
+           9       0.00      0.00      0.00        32
+          10       0.00      0.00      0.00       136
+          11       0.01      0.08      0.01       106
+          12       0.20      0.00      0.01       323
+          13       0.02      0.56      0.04       218
+          14       0.00      0.00      0.00        13
+
+    accuracy                           0.02     10949
+   macro avg       0.04      0.06      0.01     10949
+weighted avg       0.05      0.02      0.01     10949
+
+
