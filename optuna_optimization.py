@@ -76,8 +76,8 @@ max_epochs = 1000  # Very high number, because we want to stop after a time.
 early_stop = 10  # early stop if 10 runs each produced worse results.
 lr_epochs = 5  # epochs to alter learning rate
 opt_direction = 'minimize'
-n_random = 25  # Random trials before the optimization begins
-max_time = 5*60*60  # 5 hours
+n_random = 5  # Random trials before the optimization begins
+max_time = 8*60*60  # 8 hours
 
 _ut = utility.Utility(".")
 cal_ds = tf.data.experimental.load("./cal_ds", (tf.TensorSpec(shape=(None, 100, 100, 3), dtype=tf.float32, name=None), tf.TensorSpec(shape=(None, 15), dtype=tf.int64, name=None))).repeat(1000)
