@@ -22,10 +22,10 @@ class OptunaModel:
         self._model.add(layers.MaxPooling2D((2, 2)))
         self._model.add(layers.Conv2D(32, (2, 2), activation='relu', input_shape=(100, 100, 3)))
         self._model.add(layers.Flatten())
-        self._model.add(layers.Dense(256, activation='relu'))
+        self._model.add(layers.Dense(512, activation='relu'))
         self._model.add(layers.Dense(15, activation='sigmoid'))
 
-        opt = keras.optimizers.Adam(lr=0.003460515573512333)
+        opt = keras.optimizers.Adam(lr=0.00414899434357157)
         self._model.compile(optimizer=opt, loss="binary_crossentropy", metrics=[tf.keras.metrics.AUC(name="auc")])
 
     def train(self):
