@@ -82,7 +82,7 @@ max_epochs = 1000  # Very high number, because we want to stop after a time.
 early_stop = 10  # early stop if 10 runs each produced worse results.
 lr_epochs = 5  # epochs to alter learning rate
 opt_direction = 'minimize'
-n_random = 25  # Random trials before the optimization begins
+n_random = 10  # Random trials before the optimization begins
 max_time = 5*60*60  # 5 hours
 
 _ut = utility.Utility(".")

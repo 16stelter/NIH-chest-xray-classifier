@@ -120,7 +120,6 @@ class CustomCNN:
                 in_y = out_y = 0
                 while in_y + fltr_h <= img_h:
                     val = np.sum(fltr[f] * img[in_x:in_x + fltr_w, in_y:in_y + fltr_h, :]) + bias[f]
-                    # here we need normalization, else output gets too big for softmax
                     normalized = val / (fltr_w * fltr_h)
                     output[out_x, out_y, f] = normalized
                     in_y += self._stride

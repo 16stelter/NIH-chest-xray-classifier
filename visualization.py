@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
+import seaborn as sn
+import pandas as pd
 import numpy as np
+import pickle
 import utility
 
 class Visualizer:
@@ -60,7 +63,26 @@ class Visualizer:
             return "Label: " + " + ".join(label) + "\n \n Prediction: " + " + ".join(pred)
         return "Label: " + " + ".join(label)
 
+    def plot_confusion_matrix(self, matrix):
+        df_cm = pd.DataFrame(matrix, index=[i for i in range(15)],
+                             columns=[i for i in range(15)])
+        plt.figure(figsize=(10,7))
+        sn.heatmap(df_cm, annot=False, vmin=0, vmax=1)
+        plt.show()
+
+
+    def plot_history(self, path):
+        with open(path, 'rb') as f:
+            history = pickle.load(f)
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['auc'])
+        plt.plot(history.history['val_loss'])
+        plt.plot(history.history['val_auc'])
+        plt.show()
+
 
 if __name__ == "__main__":
     viz = Visualizer()
-    viz.sample_and_show(viz._ut.get_test_names())
+    #viz.plot_confusion_matrix(matrix_5)
+    viz.plot_history("./history")
+    #viz.sample_and_show(viz._ut.get_test_names())
