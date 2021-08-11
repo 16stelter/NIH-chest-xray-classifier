@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import utility
+import optimized_model
 
 class Visualizer:
     """
@@ -22,6 +23,12 @@ class Visualizer:
         (x, y) = next(iter(ds))
         self.show_sample_grid(x[0:25], y[0:25])
 
+    def predict_and_show(self, weight_path):
+        model = optimized_model.OptunaModel()
+        model._model.load_weights(weight_path)
+        x, y, y_pred =model.predict()
+        self.show_sample_grid(x[0:25], y[0:25], y_pred[0:25])
+
     def show_sample_grid(self, x, y, y_pred=None):
         """
         Shows samples in a grid.
@@ -35,11 +42,13 @@ class Visualizer:
         for n in range(len(x)):
             plt.subplot(grid, grid, n+1)
             plt.axis("off")
-            if y_pred:
+            if y_pred.any():
                 plt.title(self.generate_title(y[n], y_pred[n]))
             else:
                 plt.title(self.generate_title(y[n], None))
             plt.imshow(x[n])
+        plt.tight_layout(h_pad=5)
+        plt.subplots_adjust(top=0.95)
         plt.show()
 
     def generate_title(self, y, y_pred=None):
@@ -56,14 +65,17 @@ class Visualizer:
         for i in range(len(column_names)):
             if y[i]:
                 label.append(column_names[i])
-            if y_pred:
-                if y_pred[i]:
-                    pred.append(column_names[i])
-        if y_pred:
-            return "Label: " + " + ".join(label) + "\n \n Prediction: " + " + ".join(pred)
+        if y_pred.any():
+            pred.append(column_names[np.argmax(y_pred)])
+        if y_pred.any():
+            return "Label: " + " + ".join(label) + " \n Prediction: " + " + ".join(pred)
         return "Label: " + " + ".join(label)
 
     def plot_confusion_matrix(self, matrix):
+        """
+        Plots a confusion matrix.
+        :param matrix: A matrix of shape NxN
+        """
         df_cm = pd.DataFrame(matrix, index=[i for i in range(15)],
                              columns=[i for i in range(15)])
         plt.figure(figsize=(10,7))
@@ -72,17 +84,26 @@ class Visualizer:
 
 
     def plot_history(self, path):
+        """
+        Plots the loss, auc, val_loss and val_auc history from a pickle file.
+        :param path: Path to the pickle
+        """
         with open(path, 'rb') as f:
             history = pickle.load(f)
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['auc'])
-        plt.plot(history.history['val_loss'])
-        plt.plot(history.history['val_auc'])
+        print(history)
+        plt.plot(history['loss'])
+        plt.plot(history['auc'])
+        plt.plot(history['val_loss'])
+        plt.plot(history['val_auc'])
+        plt.legend(['loss', 'auc', 'val_loss', 'val_auc'])
+        plt.xlabel('epoch')
+        plt.ylabel('value')
         plt.show()
 
 
 if __name__ == "__main__":
     viz = Visualizer()
-    #viz.plot_confusion_matrix(matrix_5)
-    viz.plot_history("./history")
-    #viz.sample_and_show(viz._ut.get_test_names())
+    # viz.plot_confusion_matrix(matrix)
+    viz.predict_and_show("./weights")
+    # viz.plot_history("./history")
+    # viz.sample_and_show(viz._ut.get_test_names())

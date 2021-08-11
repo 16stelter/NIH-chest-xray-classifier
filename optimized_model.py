@@ -1,4 +1,5 @@
 import keras
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.callbacks import ModelCheckpoint
@@ -6,14 +7,21 @@ import utility
 import pickle
 
 class OptunaModel:
+    """
+    Implementation of the best model according to the optuna study.
+    """
     def __init__(self):
         self._model = models.Sequential()
         self._history = 0
         self.initialize_model()
         self._ut = utility.Utility(".")
         self._epochs = 20
+        self._learning_rate
 
     def initialize_model(self):
+        """
+        Initializes and compiles the model.
+        """
         self._model.add(layers.Conv2D(32, (2, 2), activation='relu', input_shape=(100, 100, 3)))
         self._model.add(layers.Conv2D(32, (2, 2), activation='relu', input_shape=(100, 100, 3)))
         self._model.add(layers.MaxPooling2D((2, 2)))
@@ -22,13 +30,16 @@ class OptunaModel:
         self._model.add(layers.MaxPooling2D((2, 2)))
         self._model.add(layers.Conv2D(32, (2, 2), activation='relu', input_shape=(100, 100, 3)))
         self._model.add(layers.Flatten())
-        self._model.add(layers.Dense(512, activation='relu'))
+        self._model.add(layers.Dense(256, activation='relu'))
         self._model.add(layers.Dense(15, activation='sigmoid'))
 
-        opt = keras.optimizers.Adam(lr=0.00414899434357157)
+        opt = keras.optimizers.Adam(lr=self._learning_rate)
         self._model.compile(optimizer=opt, loss="binary_crossentropy", metrics=[tf.keras.metrics.AUC(name="auc")])
 
     def train(self):
+        """
+        Trains the model, using class weights and checkpoints. Saves the history and the best performing weights.
+        """
         ds = self._ut.create_dataset(self._ut.get_training_names()).repeat(self._epochs)
         validation_ds = self._ut.create_dataset(self._ut.get_valid_names())
         filepath = "./weights"
@@ -51,13 +62,19 @@ class OptunaModel:
             pickle.dump(self._history.history, f)
 
     def predict(self):
+        """
+        Predicts on the test dataset.
+        :return: images, true labels, predicted labels
+        """
         ds = self._ut.create_dataset(self._ut.get_test_names())
-        y_test = np.argmax(np.concatenate([y for x, y in ds], axis=0), axis=1)
+        x = np.concatenate([x for x, y in ds], axis=0)
+        y_test = np.concatenate([y for x, y in ds], axis=0)
         y_pred = self._model.predict(ds)
-        return y_test, y_pred
+        return x, y_test, y_pred
+
 
 if __name__ == "__main__":
     cnn = OptunaModel()
     cnn.train()
-    y_test, y_pred = cnn.predict()
+    _, y_test, y_pred = cnn.predict()
     cnn._ut.classification_report(y_test, y_pred)

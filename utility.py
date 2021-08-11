@@ -176,4 +176,3 @@ class Utility:
 
 if __name__ == "__main__":
     ut = Utility(".")
-    print(ut.create_balanced_dataset(ut._training_names, 6959))
