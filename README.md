@@ -27,6 +27,9 @@ All networks are set up to first train, then predict and calculate a classificat
 Simply run the any file by using ```python3 filename.py```.
 The networks require the dataset mentioned above to run. 
 By default, the dataset is expected in a folder called ```data```, located in the same folder where the python script is run.
+The optuna optimizer expects a calibration dataset in a folder called ```cal_ds```. 
+This dataset can be generated using the ```create_balanced_dataset``` method of the ```utility.py``` file.
+The full sized dataset could also be substituted in, but training will take significantly longer.
 
 Parameters can currently only be manipulating by directly changing the source code.
 All relevant parameters can be found in the init function of each class.
